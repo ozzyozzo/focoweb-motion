@@ -12,9 +12,8 @@
   <!-- Background -->
   <rect x="0" y="0" width="400" height="400" rx="72" fill="#12172B"/>
 
-  <!-- Rays (personalidad / energía) -->
+  <!-- Orejas (personalidad / energía) -->
   <g stroke="url(#bulbGlow)" stroke-width="10" stroke-linecap="round" opacity="0.9">
-    <line x1="200" y1="48" x2="200" y2="78"/>
     <line x1="116" y1="78" x2="136" y2="98"/>
     <line x1="284" y1="78" x2="264" y2="98"/>
   </g>

@@ -14,10 +14,10 @@ export const timeline = {
   /** Golpe de luz del encendido */
   flashAt: 34,
   flashLength: 12,
-  /** Salen los rayos, escalonados */
-  raysStart: 36,
-  rayStagger: 4,
-  rayLength: 10,
+  /** Salen las orejas, una después de la otra */
+  earsStart: 36,
+  earStagger: 4,
+  earLength: 10,
   /** Aparece el texto */
   textStart: 46,
 } as const;
@@ -84,10 +84,10 @@ export const useStingAnim = ({
   const breathing = 0.08 * Math.sin((frame / fps) * Math.PI * 1.1);
   const glow = Math.max(0, ignition + (frame > timeline.flashAt + 16 ? breathing : 0));
 
-  // Los tres rayos salen escalonados
-  const ray = (index: number) => {
-    const start = timeline.raysStart + index * timeline.rayStagger;
-    return interpolate(frame, [start, start + timeline.rayLength], [0, 1], {
+  // Las dos orejas salen una después de la otra
+  const ear = (index: number) => {
+    const start = timeline.earsStart + index * timeline.earStagger;
+    return interpolate(frame, [start, start + timeline.earLength], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: Easing.out(Easing.back(1.6)),
@@ -99,7 +99,7 @@ export const useStingAnim = ({
     bodyOpacity,
     filament,
     glow,
-    rays: [ray(0), ray(1), ray(2)],
+    ears: [ear(0), ear(1)],
     flash,
     background: withBackground ? 1 : 0,
   };

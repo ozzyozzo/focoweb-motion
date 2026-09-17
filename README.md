@@ -79,9 +79,9 @@ export const timeline = {
   filamentEnd: 36,
   flashAt: 34,         // golpe de luz del encendido
   flashLength: 12,
-  raysStart: 36,       // salen los rayos, escalonados
-  rayStagger: 4,
-  rayLength: 10,
+  earsStart: 36,       // salen las orejas, una después de la otra
+  earStagger: 4,
+  earLength: 10,
   textStart: 46,       // aparece el texto
 };
 ```
@@ -90,16 +90,22 @@ Deja el Studio abierto mientras editas: recarga en caliente y ves el cambio al i
 
 ## Nota sobre el SVG del logo
 
-El archivo original tenía un problema: el gradiente `bulbGlow` usaba
-`gradientUnits="objectBoundingBox"` (el valor por defecto). Las tres piezas que
-son líneas perfectamente verticales u horizontales —el rayo de arriba y las dos
-líneas de la rosca— tienen una caja de tamaño cero en algún eje, así que el
-gradiente quedaba degenerado y el navegador simplemente no las pintaba.
+La copia en `public/logo/focoweb-logo.svg` tiene tres cambios respecto del
+archivo original:
 
-La copia en `public/logo/focoweb-logo.svg` ya está corregida con
-`gradientUnits="userSpaceOnUse"`. Conviene aplicar el mismo cambio al archivo
-maestro en `~/biz/focoweb/logo/`. De paso, esa copia también tiene quitada la
-metadata C2PA, que pesaba 7,7 KB de los 9,3 KB del archivo.
+1. **El gradiente ahora usa `gradientUnits="userSpaceOnUse"`.** Con el valor por
+   defecto (`objectBoundingBox`), las piezas que son líneas perfectamente
+   verticales u horizontales tienen una caja de tamaño cero en algún eje: el
+   gradiente queda degenerado y el navegador simplemente no las pinta. Por eso
+   las dos líneas de la rosca nunca se veían.
+2. **Se eliminó la línea vertical de arriba.** El original tenía tres rayos,
+   pero uno de ellos era justamente una línea vertical afectada por el problema
+   anterior, así que nunca se dibujó. El isotipo se diseñó alrededor de los dos
+   rayos diagonales, que funcionan como orejas, así que la versión de dos es la
+   buena y la vertical se quitó de verdad en vez de quedar oculta por accidente.
+3. **Se quitó la metadata C2PA**, que pesaba 7,7 KB de los 9,3 KB del archivo.
+
+Conviene llevar estos mismos cambios al archivo maestro en `~/biz/focoweb/logo/`.
 
 ## Publicar en redes
 

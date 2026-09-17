@@ -15,8 +15,8 @@ export type LogoAnim = {
   filament: number;
   /** Intensidad del resplandor del filamento, de 0 a 1 */
   glow: number;
-  /** Progreso de cada uno de los tres rayos, de 0 a 1 */
-  rays: [number, number, number];
+  /** Progreso de cada oreja, de 0 a 1 */
+  ears: [number, number];
   /** Opacidad del flash radial del encendido, de 0 a 1 */
   flash: number;
   /** Opacidad del fondo azul noche (0 = fondo transparente) */
@@ -28,17 +28,18 @@ export const idleAnim: LogoAnim = {
   bodyOpacity: 1,
   filament: 1,
   glow: 0.5,
-  rays: [1, 1, 1],
+  ears: [1, 1],
   flash: 0,
   background: 1,
 };
 
-/** Los tres rayos, definidos desde el extremo interior hacia afuera
- *  para que el trazo se dibuje saliendo de la ampolleta. */
-const RAYS = [
-  "M 200 78 L 200 48",
-  "M 136 98 L 116 78",
-  "M 264 98 L 284 78",
+/** Las dos orejas, definidas desde el extremo pegado a la ampolleta hacia
+ *  afuera, para que el trazo se dibuje saliendo de ella.
+ *  El primer punto de cada una es también su pivote natural de rotación,
+ *  por si más adelante se quieren mover como orejas de verdad. */
+const EARS = [
+  { d: "M 136 98 L 116 78", pivot: [136, 98] },
+  { d: "M 264 98 L 284 78", pivot: [264, 98] },
 ] as const;
 
 /** Un dashoffset fuera de [0,1] desplaza el patrón y abre huecos. */
@@ -53,7 +54,7 @@ type Props = {
 };
 
 export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
-  const { bodyScale, bodyOpacity, filament, glow, rays, flash, background } =
+  const { bodyScale, bodyOpacity, filament, glow, ears, flash, background } =
     anim;
 
   return (
@@ -105,7 +106,7 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
         opacity={background}
       />
 
-      {/* Rayos: se dibujan desde la ampolleta hacia afuera */}
+      {/* Orejas: se dibujan desde la ampolleta hacia afuera */}
       <g
         stroke="url(#bulbGlow)"
         strokeWidth="10"
@@ -115,14 +116,14 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
           filter: `drop-shadow(0 0 ${6 * glow}px ${colors.halo})`,
         }}
       >
-        {RAYS.map((d, i) => (
+        {EARS.map((ear, i) => (
           <path
-            key={d}
-            d={d}
+            key={ear.d}
+            d={ear.d}
             fill="none"
             pathLength={1}
             strokeDasharray={1}
-            strokeDashoffset={clamp01(1 - rays[i])}
+            strokeDashoffset={clamp01(1 - ears[i])}
           />
         ))}
       </g>
