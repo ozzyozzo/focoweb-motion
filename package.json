@@ -1,0 +1,33 @@
+{
+  "name": "focoweb-motion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plantillas de video para redes sociales de Focoweb, hechas con Remotion",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render",
+    "render:vertical": "remotion render StingVertical out/sting-vertical.mp4",
+    "render:square": "remotion render StingSquare out/sting-square.mp4",
+    "render:alpha": "remotion render StingAlpha out/sting-alpha.mov --codec=prores --prores-profile=4444 --image-format=png --pixel-format=yuva444p10le",
+    "render:reel": "remotion render ReelIntro out/reel-intro.mp4",
+    "render:all": "npm run render:vertical && npm run render:square && npm run render:alpha && npm run render:reel",
+    "typecheck": "tsc --noEmit",
+    "upgrade": "remotion upgrade",
+    "render:alpha-webm": "remotion render StingAlpha out/sting-alpha.webm --codec=vp8 --image-format=png --pixel-format=yuva420p"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.525",
+    "@remotion/google-fonts": "4.0.525",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.525"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "typescript": "5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}

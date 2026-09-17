@@ -1,0 +1,41 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" xmlns:c2pa="http://c2pa.org/manifest">
+  <defs>
+    <!-- userSpaceOnUse: sin esto, las lineas verticales y horizontales
+         (rayo superior y rosca) tienen bounding box de tamano cero y el
+         navegador no las pinta. -->
+    <linearGradient id="bulbGlow" gradientUnits="userSpaceOnUse" x1="110" y1="48" x2="290" y2="344">
+      <stop offset="0%" stop-color="#FFD874"/>
+      <stop offset="100%" stop-color="#FF9F45"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="400" rx="72" fill="#12172B"/>
+
+  <!-- Rays (personalidad / energía) -->
+  <g stroke="url(#bulbGlow)" stroke-width="10" stroke-linecap="round" opacity="0.9">
+    <line x1="200" y1="48" x2="200" y2="78"/>
+    <line x1="116" y1="78" x2="136" y2="98"/>
+    <line x1="284" y1="78" x2="264" y2="98"/>
+  </g>
+
+  <!-- Bulb glass -->
+  <circle cx="200" cy="188" r="98" fill="#1D2440" stroke="url(#bulbGlow)" stroke-width="10"/>
+
+  <!-- Bulb neck -->
+  <path d="M 168 274 L 168 302 Q 168 314 180 314 L 220 314 Q 232 314 232 302 L 232 274 Z"
+        fill="#1D2440" stroke="url(#bulbGlow)" stroke-width="10" stroke-linejoin="round"/>
+
+  <!-- Screw threads -->
+  <line x1="166" y1="290" x2="234" y2="290" stroke="url(#bulbGlow)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="168" y1="304" x2="232" y2="304" stroke="url(#bulbGlow)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Base -->
+  <path d="M 176 318 L 224 318 L 220 336 Q 218 344 208 344 L 192 344 Q 182 344 180 336 Z"
+        fill="url(#bulbGlow)"/>
+
+  <!-- Filamento en forma de "W" -->
+  <path d="M 148 168 L 172 216 L 200 176 L 228 216 L 252 168"
+        fill="none" stroke="url(#bulbGlow)" stroke-width="14"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
