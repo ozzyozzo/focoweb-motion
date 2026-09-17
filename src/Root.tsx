@@ -8,6 +8,7 @@ import {
 } from "./compositions/CharacterLoop";
 import { MoodSheet } from "./compositions/MoodSheet";
 import { MoodLoop, defaultMoodProps } from "./compositions/MoodLoop";
+import { Scene, defaultSceneProps } from "./compositions/Scene";
 import { fps } from "./theme";
 
 /**
@@ -92,6 +93,17 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1080}
         defaultProps={defaultMoodProps}
+      />
+
+      {/* El personaje actuando un guion de actitudes */}
+      <Composition
+        id="Scene"
+        component={Scene}
+        durationInFrames={fps * 8}
+        fps={fps}
+        width={1080}
+        height={1080}
+        defaultProps={defaultSceneProps}
       />
 
       {/* Todas las actitudes juntas, para revisarlas de una mirada */}

@@ -33,7 +33,12 @@ export const MoodLoop: React.FC<MoodLoopProps> = ({
       }}
     >
       <FocowebLogo
-        anim={moodAnim({ mood, frame, durationInFrames, withBackground })}
+        anim={moodAnim({
+          mood,
+          frame,
+          cycleInFrames: durationInFrames,
+          withBackground,
+        })}
         size={width * logoScale}
       />
     </AbsoluteFill>

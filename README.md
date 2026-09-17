@@ -31,6 +31,7 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 | `CharacterLoopAlpha` | 1080×1080, fondo transparente | 4 s | El mismo loop como sticker sobre otro video |
 | `MoodLoop` | 1080×1080 | 4 s | Una actitud sostenida, en loop. Elige cuál con la prop `mood`. |
 | `MoodSheet` | 1200×1200 | 4 s | Las nueve actitudes a la vez, para revisarlas |
+| `Scene` | 1080×1080 | 8 s | El personaje actuando un guion de actitudes |
 
 ## Renderizar
 
@@ -41,6 +42,7 @@ npm run render:reel         # out/reel-intro.mp4
 npm run render:loop         # out/character-loop.mp4
 npm run moods               # out/mood-sheet.png, todas las actitudes de una mirada
 npm run render:moods        # out/mood-sheet.mp4, las mismas pero en movimiento
+npm run render:scene        # out/scene.mp4
 npm run render:alpha        # out/sting-alpha.mov  (ProRes 4444, para editores)
 npm run render:alpha-webm   # out/sting-alpha.webm (VP8, más liviano, para web)
 npm run render:loop-alpha   # out/character-loop.webm (loop con transparencia)
@@ -71,6 +73,7 @@ src/
     useCharacterAnim.ts         El ciclo de reposo del personaje
     expressions.ts              Las caras y las actitudes del personaje
     moodAnim.ts                 Una actitud sostenida, en loop
+    performance.ts              El paso de una actitud a otra
     motion.ts                   Utilidades de movimiento compartidas
     Wordmark.tsx                El logotipo en texto
   compositions/
@@ -79,6 +82,7 @@ src/
     CharacterLoop.tsx           El personaje vivo, en loop
     MoodLoop.tsx                Una actitud, para usarla de sticker
     MoodSheet.tsx               Las nueve actitudes juntas
+    Scene.tsx                   El personaje actuando un guion
 public/logo/                    El SVG original, corregido
 ```
 
@@ -151,6 +155,46 @@ npx remotion render MoodLoop out/frustrado.webm \
   --props='{"mood":"frustrado","withBackground":false,"logoScale":0.55}' \
   --codec=vp8 --image-format=png --pixel-format=yuva420p
 ```
+
+### Escenas: pasar de una actitud a otra
+
+Para un video largo no sirve una actitud sostenida, sirve el cambio. `Scene`
+recibe un guion —qué siente el personaje y desde qué frame— y lo interpreta:
+
+```bash
+npx remotion render Scene out/idea.mp4 --props='{
+  "beats": [
+    { "mood": "pensando",    "at": 0 },
+    { "mood": "confundido",  "at": 45 },
+    { "mood": "frustrado",   "at": 90,  "transition": 6 },
+    { "mood": "sorprendido", "at": 140, "transition": 4 },
+    { "mood": "emocionado",  "at": 158 },
+    { "mood": "feliz",       "at": 200, "transition": 20 }
+  ],
+  "withBackground": true,
+  "logoScale": 0.55
+}'
+```
+
+`at` es el frame en que empieza el cambio y `transition` cuántos frames tarda,
+10 por omisión. Transiciones cortas, de 4 a 6 frames, se sienten como una
+reacción de golpe; largas, de 20 o más, como un ánimo que se va apagando o
+creciendo de a poco. A 30 fps, 30 frames es un segundo.
+
+Dos decisiones detrás de que esto se vea actuado y no interpolado:
+
+- **Las dos actitudes se siguen moviendo durante la mezcla.** No se mezclan dos
+  poses congeladas, se mezclan dos animaciones vivas. Sin esto el cambio se ve
+  como un fundido entre dos fotos.
+- **Cada cambio suelta un impulso que se apaga solo.** El personaje acusa el
+  golpe con las orejas y el cuerpo, y se acomoda. Sin ese impulso la transición
+  queda correcta pero muerta.
+
+Dentro de una escena el movimiento de reposo corre a un ritmo fijo de dos
+segundos por vuelta, no estirado al largo del video. Por eso `moodAnim` recibe
+`cycleInFrames` y no la duración: pasándole la duración queda en loop perfecto,
+pasándole un valor fijo mantiene el ritmo. `MoodLoop` usa lo primero y `Scene`
+lo segundo.
 
 Dos advertencias sobre las caras, aprendidas probándolas: la tristeza tiene
 que caer **pareja** hacia los dos lados y la frustración tiene que ser

@@ -15,6 +15,7 @@
     "render:mood": "remotion render MoodLoop out/mood.mp4",
     "render:moods": "remotion render MoodSheet out/mood-sheet.mp4",
     "render:reel": "remotion render ReelIntro out/reel-intro.mp4",
+    "render:scene": "remotion render Scene out/scene.mp4",
     "render:square": "remotion render StingSquare out/sting-square.mp4",
     "render:vertical": "remotion render StingVertical out/sting-vertical.mp4",
     "typecheck": "tsc --noEmit",

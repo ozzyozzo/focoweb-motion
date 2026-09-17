@@ -4,7 +4,15 @@ import { moods, type MoodName } from "./expressions";
 type Options = {
   mood: MoodName;
   frame: number;
-  durationInFrames: number;
+  /**
+   * Cuántos frames dura una vuelta completa del movimiento de reposo.
+   *
+   * Si le pasas el largo de la composición, la actitud queda en loop perfecto,
+   * que es lo que quieren `MoodLoop` y `MoodSheet`. Si le pasas un valor fijo
+   * —dos segundos, por ejemplo— el personaje se mueve siempre al mismo ritmo
+   * sin importar cuán largo sea el video, que es lo que necesita una escena.
+   */
+  cycleInFrames: number;
   withBackground?: boolean;
 };
 
@@ -18,18 +26,18 @@ type Options = {
  * llamar varias veces en el mismo render, por ejemplo dentro de un `.map()`
  * para mostrar todas las actitudes a la vez.
  *
- * Igual que en el ciclo de reposo, todo se calcula sobre una fase que da
- * exactamente una vuelta a lo largo de la composición, y cada frecuencia es
- * un número entero, así que el último frame empalma con el primero.
+ * Igual que en el ciclo de reposo, todo se calcula sobre una fase y cada
+ * frecuencia es un número entero. Si `cycleInFrames` es el largo de la
+ * composición, el último frame empalma con el primero.
  */
 export const moodAnim = ({
   mood,
   frame,
-  durationInFrames,
+  cycleInFrames,
   withBackground = true,
 }: Options): LogoAnim => {
   const m = moods[mood];
-  const phase = (frame / durationInFrames) * Math.PI * 2;
+  const phase = (frame / cycleInFrames) * Math.PI * 2;
   const { motion } = m;
 
   const bob = m.bob - motion.bobAmp * Math.sin(motion.bobFreq * phase);

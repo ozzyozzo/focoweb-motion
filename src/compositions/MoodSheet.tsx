@@ -47,7 +47,7 @@ export const MoodSheet: React.FC = () => {
             anim={moodAnim({
               mood: name,
               frame,
-              durationInFrames,
+              cycleInFrames: durationInFrames,
               withBackground: false,
             })}
             size={cell * 0.62}
