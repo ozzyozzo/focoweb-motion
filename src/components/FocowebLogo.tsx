@@ -1,5 +1,6 @@
 import React from "react";
 import { colors, LOGO_VIEWBOX } from "../theme";
+import { FACES, facePathData, type FaceShape } from "./expressions";
 
 /**
  * Estado de animación del logo. Cada campo controla una pieza del SVG,
@@ -32,8 +33,8 @@ export type LogoAnim = {
   tilt: number;
   /** Desplazamiento vertical del personaje, en unidades del viewBox */
   bob: number;
-  /** Forma de la cara: 0 neutra, 1 sonrisa amplia, -1 cara chica */
-  face: number;
+  /** Forma de la cara. Usa las de `expressions.ts` o mézclalas con `mixFace`. */
+  face: FaceShape;
 };
 
 export const idleAnim: LogoAnim = {
@@ -48,7 +49,7 @@ export const idleAnim: LogoAnim = {
   squash: 0,
   tilt: 0,
   bob: 0,
-  face: 0,
+  face: FACES.neutral,
 };
 
 /** Las dos orejas, definidas desde el extremo pegado a la ampolleta hacia
@@ -59,28 +60,10 @@ const EARS = [
   { d: "M 264 98 L 284 78", pivot: [264, 98], direction: 1 },
 ] as const;
 
-/**
- * La "W" es toda la cara del personaje, así que se anima cambiando su forma.
- * Las tres variantes tienen exactamente los mismos puntos, en el mismo orden,
- * para poder interpolar entre ellas punto por punto.
- */
-const FACE_NEUTRAL = [148, 168, 172, 216, 200, 176, 228, 216, 252, 168];
-const FACE_HAPPY = [140, 160, 168, 226, 200, 182, 232, 226, 260, 160];
-const FACE_SMALL = [160, 178, 177, 205, 200, 186, 223, 205, 240, 178];
-
 /** Pivote del personaje: la punta del casquillo, o sea donde "se apoya". */
 const FEET = [200, 344] as const;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-/** Construye la "W" mezclando la forma neutra con la alegre o la chica. */
-const facePath = (face: number): string => {
-  const target = face >= 0 ? FACE_HAPPY : FACE_SMALL;
-  const t = Math.min(1, Math.abs(face));
-  const p = FACE_NEUTRAL.map((v, i) => lerp(v, target[i], t));
-  return `M ${p[0]} ${p[1]} L ${p[2]} ${p[3]} L ${p[4]} ${p[5]} L ${p[6]} ${p[7]} L ${p[8]} ${p[9]}`;
-};
 
 type Props = {
   anim: LogoAnim;
@@ -251,7 +234,7 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
 
           {/* La cara: la "W" completa, que se dibuja y luego cambia de forma */}
           <path
-            d={facePath(face)}
+            d={facePathData(face)}
             fill="none"
             stroke="url(#bulbGlow)"
             strokeWidth="14"

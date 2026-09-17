@@ -1,4 +1,5 @@
 import type { LogoAnim } from "./FocowebLogo";
+import { FACES, mixFace } from "./expressions";
 
 /**
  * Parámetros del personaje en reposo. Son amplitudes, así que subirlos
@@ -56,8 +57,11 @@ export const useCharacterAnim = ({
   const flap = character.earFlap * Math.sin(2 * phase - character.earLag);
   const offset = character.earOffset * Math.sin(phase);
 
-  const face =
-    character.smile + 0.2 * Math.sin(2 * phase - 0.6);
+  const face = mixFace(
+    FACES.neutral,
+    FACES.feliz,
+    character.smile + 0.2 * Math.sin(2 * phase - 0.6),
+  );
 
   return {
     bodyScale: 1,

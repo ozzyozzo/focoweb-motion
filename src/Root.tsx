@@ -6,6 +6,8 @@ import {
   CharacterLoop,
   defaultCharacterProps,
 } from "./compositions/CharacterLoop";
+import { MoodSheet } from "./compositions/MoodSheet";
+import { MoodLoop, defaultMoodProps } from "./compositions/MoodLoop";
 import { fps } from "./theme";
 
 /**
@@ -79,6 +81,27 @@ export const RemotionRoot: React.FC = () => {
           showWordmark: false,
           tagline: "",
         }}
+      />
+
+      {/* Una sola actitud, en loop. Cambia la prop `mood` para elegir cuál. */}
+      <Composition
+        id="MoodLoop"
+        component={MoodLoop}
+        durationInFrames={fps * 4}
+        fps={fps}
+        width={1080}
+        height={1080}
+        defaultProps={defaultMoodProps}
+      />
+
+      {/* Todas las actitudes juntas, para revisarlas de una mirada */}
+      <Composition
+        id="MoodSheet"
+        component={MoodSheet}
+        durationInFrames={fps * 4}
+        fps={fps}
+        width={1200}
+        height={1200}
       />
 
       {/* Plantilla de Reel completa: logo + mensaje + llamado a la acción */}

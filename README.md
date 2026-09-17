@@ -29,6 +29,8 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 | `ReelIntro` | 1080×1920 (9:16) | 8 s | Reel completo: logo, titular, puntos y llamado a la acción |
 | `CharacterLoop` | 1080×1080 (1:1) | 4 s | El personaje en reposo, en loop perfecto |
 | `CharacterLoopAlpha` | 1080×1080, fondo transparente | 4 s | El mismo loop como sticker sobre otro video |
+| `MoodLoop` | 1080×1080 | 4 s | Una actitud sostenida, en loop. Elige cuál con la prop `mood`. |
+| `MoodSheet` | 1200×1200 | 4 s | Las nueve actitudes a la vez, para revisarlas |
 
 ## Renderizar
 
@@ -37,6 +39,8 @@ npm run render:vertical     # out/sting-vertical.mp4
 npm run render:square       # out/sting-square.mp4
 npm run render:reel         # out/reel-intro.mp4
 npm run render:loop         # out/character-loop.mp4
+npm run moods               # out/mood-sheet.png, todas las actitudes de una mirada
+npm run render:moods        # out/mood-sheet.mp4, las mismas pero en movimiento
 npm run render:alpha        # out/sting-alpha.mov  (ProRes 4444, para editores)
 npm run render:alpha-webm   # out/sting-alpha.webm (VP8, más liviano, para web)
 npm run render:loop-alpha   # out/character-loop.webm (loop con transparencia)
@@ -65,12 +69,16 @@ src/
     FocowebLogo.tsx             El isotipo en SVG, con cada pieza animable
     useStingAnim.ts             La línea de tiempo del encendido
     useCharacterAnim.ts         El ciclo de reposo del personaje
+    expressions.ts              Las caras y las actitudes del personaje
+    moodAnim.ts                 Una actitud sostenida, en loop
     motion.ts                   Utilidades de movimiento compartidas
     Wordmark.tsx                El logotipo en texto
   compositions/
     LogoSting.tsx               Sting del logo, solo
     ReelIntro.tsx               Plantilla de Reel con mensaje
     CharacterLoop.tsx           El personaje vivo, en loop
+    MoodLoop.tsx                Una actitud, para usarla de sticker
+    MoodSheet.tsx               Las nueve actitudes juntas
 public/logo/                    El SVG original, corregido
 ```
 
@@ -109,10 +117,45 @@ extremo pegado a la ampolleta.
 | `squash` | Aplastado y estirado. Positivo aplasta, negativo estira, y el volumen se conserva. |
 | `tilt` | Inclinación de todo el cuerpo, sobre la base del casquillo. |
 | `bob` | Desplazamiento vertical. Negativo es hacia arriba. |
-| `face` | Forma de la "W": 0 neutra, 1 sonrisa amplia, -1 cara chica. |
+| `face` | La forma de la "W". Sale de la librería de expresiones. |
 
-La cara se anima interpolando entre tres versiones de la "W" que tienen los
-mismos puntos en el mismo orden, así que se puede mezclar punto por punto.
+### Las actitudes
+
+`src/components/expressions.ts` guarda nueve actitudes: `neutral`, `feliz`,
+`emocionado`, `triste`, `frustrado`, `sorprendido`, `pensando`, `confundido`
+y `dormido`.
+
+Cada una es una pose completa —forma de la cara, ángulo de las orejas,
+aplastado, inclinación, resplandor— más su propia manera de moverse: el feliz
+rebota, el triste apenas respira, el frustrado tiembla rápido.
+
+Todas las caras son variantes de la misma "W": cinco puntos, siempre en el
+mismo orden, siempre diez números. Por eso se puede mezclar cualquier cara con
+cualquier otra punto por punto, con `mixFace`, y pasar de una emoción a la
+siguiente sin cortes:
+
+```ts
+import { FACES, mixFace } from "./components/expressions";
+
+// A mitad de camino entre neutral y feliz
+const face = mixFace(FACES.neutral, FACES.feliz, 0.5);
+```
+
+Para verlas todas: `npm run moods` deja un PNG con las nueve, y
+`npm run render:moods` las deja en movimiento.
+
+Para sacar una sola como sticker:
+
+```bash
+npx remotion render MoodLoop out/frustrado.webm \
+  --props='{"mood":"frustrado","withBackground":false,"logoScale":0.55}' \
+  --codec=vp8 --image-format=png --pixel-format=yuva420p
+```
+
+Dos advertencias sobre las caras, aprendidas probándolas: la tristeza tiene
+que caer **pareja** hacia los dos lados y la frustración tiene que ser
+**torcida**, o se confunden entre sí. Y la confusión se lee sobre todo en las
+orejas descoordinadas, una parada y la otra caída, más que en la boca.
 
 Las amplitudes del ciclo de reposo están en la constante `character` de
 `src/components/useCharacterAnim.ts`. Subir `earFlap` o `squash` exagera el

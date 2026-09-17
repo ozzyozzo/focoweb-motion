@@ -1,6 +1,7 @@
 import { interpolate, spring, Easing } from "remotion";
 import type { LogoAnim } from "./FocowebLogo";
 import { decay } from "./motion";
+import { FACES, mixFace } from "./expressions";
 
 /**
  * Línea de tiempo del "sting" del logo, en frames a 30 fps.
@@ -117,13 +118,15 @@ export const useStingAnim = ({
       halfLife: 0.3,
     });
 
-  // La cara pasa de chica y apagada a una sonrisa al encenderse
-  const face = interpolate(
+  // La cara pasa de recogida y apagada a una sonrisa al encenderse, y luego
+  // se relaja a medio camino entre la neutra y la feliz.
+  const smile = interpolate(
     frame,
     [timeline.faceStart, timeline.flashAt, timeline.flashAt + 14],
-    [-0.6, 0.45, 0.15],
+    [0, 1, 0.55],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
+  const face = mixFace(FACES.sorprendido, FACES.feliz, smile);
 
   return {
     bodyScale,
