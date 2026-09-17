@@ -1,0 +1,19 @@
+{
+  "beats": [
+    { "mood": "neutral",     "at": 0 },
+    { "mood": "sorprendido", "at": 24,  "transition": 3 },
+    { "mood": "frustrado",   "at": 48,  "transition": 10 },
+    { "mood": "pensando",    "at": 84,  "transition": 18 },
+    { "mood": "emocionado",  "at": 132, "transition": 4 },
+    { "mood": "feliz",       "at": 160, "transition": 24 }
+  ],
+  "cues": [
+    { "gesture": "susto", "at": 24 },
+    { "gesture": "negar", "at": 56 },
+    { "gesture": "idea",  "at": 132 },
+    { "gesture": "salto", "at": 146, "strength": 0.8 },
+    { "gesture": "risa",  "at": 172 }
+  ],
+  "withBackground": true,
+  "logoScale": 0.55
+}

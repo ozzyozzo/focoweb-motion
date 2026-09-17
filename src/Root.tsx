@@ -8,6 +8,7 @@ import {
 } from "./compositions/CharacterLoop";
 import { MoodSheet } from "./compositions/MoodSheet";
 import { GestureSheet } from "./compositions/GestureSheet";
+import { TransitionSpeeds } from "./compositions/TransitionSpeeds";
 import { MoodLoop, defaultMoodProps } from "./compositions/MoodLoop";
 import { Scene, defaultSceneProps } from "./compositions/Scene";
 import { fps } from "./theme";
@@ -104,6 +105,16 @@ export const RemotionRoot: React.FC = () => {
         fps={fps}
         width={1440}
         height={800}
+      />
+
+      {/* El mismo cambio a tres velocidades, para entender `transition` */}
+      <Composition
+        id="TransitionSpeeds"
+        component={TransitionSpeeds}
+        durationInFrames={fps * 3}
+        fps={fps}
+        width={1440}
+        height={620}
       />
 
       {/* El personaje actuando un guion de actitudes */}

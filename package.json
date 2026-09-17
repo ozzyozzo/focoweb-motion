@@ -11,6 +11,7 @@
     "render:all": "npm run render:vertical && npm run render:square && npm run render:alpha && npm run render:reel && npm run render:loop",
     "render:alpha": "remotion render StingAlpha out/sting-alpha.mov --codec=prores --prores-profile=4444 --image-format=png --pixel-format=yuva444p10le",
     "render:alpha-webm": "remotion render StingAlpha out/sting-alpha.webm --codec=vp8 --image-format=png --pixel-format=yuva420p",
+    "render:ejemplo": "remotion render Scene out/guion-ejemplo.mp4 --frames=0-209 --props=./examples/guion-ejemplo.json",
     "render:loop": "remotion render CharacterLoop out/character-loop.mp4",
     "render:loop-alpha": "remotion render CharacterLoopAlpha out/character-loop.webm --codec=vp8 --image-format=png --pixel-format=yuva420p",
     "render:mood": "remotion render MoodLoop out/mood.mp4",
@@ -19,6 +20,7 @@
     "render:scene": "remotion render Scene out/scene.mp4",
     "render:square": "remotion render StingSquare out/sting-square.mp4",
     "render:vertical": "remotion render StingVertical out/sting-vertical.mp4",
+    "transiciones": "remotion render TransitionSpeeds out/transition-speeds.mp4",
     "typecheck": "tsc --noEmit",
     "upgrade": "remotion upgrade"
   },

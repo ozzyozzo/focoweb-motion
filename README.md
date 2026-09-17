@@ -33,6 +33,7 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 | `MoodSheet` | 1200×1200 | 4 s | Las nueve actitudes a la vez, para revisarlas |
 | `Scene` | 1080×1080 | 8 s | El personaje actuando un guion de actitudes y gestos |
 | `GestureSheet` | 1440×800 | 3 s | Los ocho gestos a la vez, para revisarlos |
+| `TransitionSpeeds` | 1440×620 | 3 s | El mismo cambio a tres velocidades, para calibrar el ojo |
 
 ## Renderizar
 
@@ -45,6 +46,8 @@ npm run moods               # out/mood-sheet.png, todas las actitudes de una mir
 npm run render:moods        # out/mood-sheet.mp4, las mismas pero en movimiento
 npm run render:scene        # out/scene.mp4
 npm run gestures            # out/gesture-sheet.mp4, los ocho gestos
+npm run transiciones        # out/transition-speeds.mp4, transition 4 vs 12 vs 30
+npm run render:ejemplo      # out/guion-ejemplo.mp4, desde examples/guion-ejemplo.json
 npm run render:alpha        # out/sting-alpha.mov  (ProRes 4444, para editores)
 npm run render:alpha-webm   # out/sting-alpha.webm (VP8, más liviano, para web)
 npm run render:loop-alpha   # out/character-loop.webm (loop con transparencia)
@@ -181,9 +184,35 @@ npx remotion render Scene out/idea.mp4 --props='{
 ```
 
 `at` es el frame en que empieza el cambio y `transition` cuántos frames tarda,
-10 por omisión. Transiciones cortas, de 4 a 6 frames, se sienten como una
-reacción de golpe; largas, de 20 o más, como un ánimo que se va apagando o
-creciendo de a poco. A 30 fps, 30 frames es un segundo.
+10 por omisión. A 30 fps, 30 frames es un segundo.
+
+Para calibrar el ojo con `transition`, `npm run transiciones` muestra el mismo
+cambio a tres velocidades, lado a lado:
+
+| `transition` | Cómo se siente | Cuándo usarlo |
+|---|---|---|
+| 3 a 6 | Reacción de golpe | Un susto, una idea que llega, algo que interrumpe |
+| 8 a 14 | Cambio normal | El ánimo cambia por algo que pasó |
+| 20 a 30 | Se va apagando, o creciendo de a poco | Resignarse, calmarse, entusiasmarse despacio |
+
+### Cómo se arma un guion
+
+El orden que funciona, y por qué en ese orden:
+
+1. **Escribe el arco en palabras**, no en frames. "Está tranquilo, algo lo
+   sorprende, se frustra, lo piensa, se le ocurre, se alegra."
+2. **Reparte los momentos en el tiempo.** A 30 fps, cada actitud necesita
+   como mínimo 20 o 25 frames para leerse. Menos que eso y el espectador no
+   alcanza a registrarla.
+3. **Elige la velocidad de cada cambio** con la tabla de arriba. No todos los
+   cambios van a la misma velocidad: ahí está casi toda la actuación.
+4. **Recién entonces agrega los gestos**, en los golpes fuertes. Un gesto sin
+   un cambio de actitud detrás se ve como un tic.
+5. **Renderiza y ajusta.** Casi siempre lo primero queda demasiado rápido.
+
+`examples/guion-ejemplo.json` tiene un guion completo armado así, y
+`npm run render:ejemplo` lo renderiza. Conviene copiarlo y editarlo antes que
+escribir uno desde cero.
 
 Dos decisiones detrás de que esto se vea actuado y no interpolado:
 
