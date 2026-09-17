@@ -31,7 +31,8 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 | `CharacterLoopAlpha` | 1080×1080, fondo transparente | 4 s | El mismo loop como sticker sobre otro video |
 | `MoodLoop` | 1080×1080 | 4 s | Una actitud sostenida, en loop. Elige cuál con la prop `mood`. |
 | `MoodSheet` | 1200×1200 | 4 s | Las nueve actitudes a la vez, para revisarlas |
-| `Scene` | 1080×1080 | 8 s | El personaje actuando un guion de actitudes |
+| `Scene` | 1080×1080 | 8 s | El personaje actuando un guion de actitudes y gestos |
+| `GestureSheet` | 1440×800 | 3 s | Los ocho gestos a la vez, para revisarlos |
 
 ## Renderizar
 
@@ -43,6 +44,7 @@ npm run render:loop         # out/character-loop.mp4
 npm run moods               # out/mood-sheet.png, todas las actitudes de una mirada
 npm run render:moods        # out/mood-sheet.mp4, las mismas pero en movimiento
 npm run render:scene        # out/scene.mp4
+npm run gestures            # out/gesture-sheet.mp4, los ocho gestos
 npm run render:alpha        # out/sting-alpha.mov  (ProRes 4444, para editores)
 npm run render:alpha-webm   # out/sting-alpha.webm (VP8, más liviano, para web)
 npm run render:loop-alpha   # out/character-loop.webm (loop con transparencia)
@@ -73,6 +75,7 @@ src/
     useCharacterAnim.ts         El ciclo de reposo del personaje
     expressions.ts              Las caras y las actitudes del personaje
     moodAnim.ts                 Una actitud sostenida, en loop
+    gestures.ts                 Los gestos puntuales
     performance.ts              El paso de una actitud a otra
     motion.ts                   Utilidades de movimiento compartidas
     Wordmark.tsx                El logotipo en texto
@@ -83,6 +86,7 @@ src/
     MoodLoop.tsx                Una actitud, para usarla de sticker
     MoodSheet.tsx               Las nueve actitudes juntas
     Scene.tsx                   El personaje actuando un guion
+    GestureSheet.tsx            Los ocho gestos juntos
 public/logo/                    El SVG original, corregido
 ```
 
@@ -189,6 +193,45 @@ Dos decisiones detrás de que esto se vea actuado y no interpolado:
 - **Cada cambio suelta un impulso que se apaga solo.** El personaje acusa el
   golpe con las orejas y el cuerpo, y se acomoda. Sin ese impulso la transición
   queda correcta pero muerta.
+
+### Gestos puntuales
+
+Una actitud es un estado que se sostiene; un gesto es una acción que ocurre y
+termina. Por eso un gesto no reemplaza a la actitud, se le **suma encima**: el
+personaje puede negar con la cabeza sin dejar de estar frustrado.
+
+Hay ocho: `salto`, `asentir`, `negar`, `idea`, `susto`, `risa`, `saludo` y
+`temblor`. Míralos con `npm run gestures`.
+
+Se disparan desde la misma escena, en el arreglo `cues`:
+
+```bash
+npx remotion render Scene out/idea.mp4 --props='{
+  "beats": [
+    { "mood": "frustrado", "at": 0 },
+    { "mood": "sorprendido", "at": 90, "transition": 4 },
+    { "mood": "feliz", "at": 120 }
+  ],
+  "cues": [
+    { "gesture": "negar", "at": 20 },
+    { "gesture": "idea",  "at": 90 },
+    { "gesture": "salto", "at": 112, "strength": 0.7 }
+  ],
+  "withBackground": true,
+  "logoScale": 0.55
+}'
+```
+
+`at` es el frame en que arranca el gesto y `strength` escala su intensidad, 1
+por omisión. Los gestos se suman entre sí, así que dos que se pisan se
+combinan en vez de pelearse.
+
+**La regla de los gestos**: cada uno devuelve diferencias, no valores
+absolutos, y todas valen cero al empezar y al terminar. Si escribes uno nuevo
+que no arranca y termina en cero, se va a ver un salto al entrar o al salir.
+Sin brazos ni ojos, el vocabulario disponible es el cuerpo, las orejas, el
+brillo y la forma de la cara: `saludo`, por ejemplo, saluda moviendo una oreja
+y dejando la otra quieta, porque si se mueven las dos no se lee como saludo.
 
 Dentro de una escena el movimiento de reposo corre a un ritmo fijo de dos
 segundos por vuelta, no estirado al largo del video. Por eso `moodAnim` recibe

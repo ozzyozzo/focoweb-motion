@@ -2,11 +2,14 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { FocowebLogo } from "../components/FocowebLogo";
 import { performanceAnim, type MoodBeat } from "../components/performance";
+import type { GestureCue } from "../components/gestures";
 import { colors } from "../theme";
 
 export type SceneProps = {
   /** El guion: qué siente el personaje y desde qué frame */
   beats: MoodBeat[];
+  /** Gestos puntuales, que se suman encima de la actitud */
+  cues: GestureCue[];
   withBackground: boolean;
   /** Tamaño del personaje como fracción del ancho del video (0 a 1) */
   logoScale: number;
@@ -19,6 +22,7 @@ export type SceneProps = {
  */
 export const Scene: React.FC<SceneProps> = ({
   beats,
+  cues,
   withBackground,
   logoScale,
 }) => {
@@ -34,7 +38,7 @@ export const Scene: React.FC<SceneProps> = ({
       }}
     >
       <FocowebLogo
-        anim={performanceAnim({ beats, frame, fps, withBackground })}
+        anim={performanceAnim({ beats, cues, frame, fps, withBackground })}
         size={width * logoScale}
       />
     </AbsoluteFill>
@@ -53,6 +57,12 @@ export const defaultSceneProps: SceneProps = {
     { mood: "sorprendido", at: 140, transition: 4 },
     { mood: "emocionado", at: 158 },
     { mood: "feliz", at: 200, transition: 20 },
+  ],
+  cues: [
+    { gesture: "negar", at: 96 },
+    { gesture: "idea", at: 140 },
+    { gesture: "salto", at: 162 },
+    { gesture: "risa", at: 200 },
   ],
   withBackground: true,
   logoScale: 0.55,

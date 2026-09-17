@@ -7,6 +7,7 @@ import {
   defaultCharacterProps,
 } from "./compositions/CharacterLoop";
 import { MoodSheet } from "./compositions/MoodSheet";
+import { GestureSheet } from "./compositions/GestureSheet";
 import { MoodLoop, defaultMoodProps } from "./compositions/MoodLoop";
 import { Scene, defaultSceneProps } from "./compositions/Scene";
 import { fps } from "./theme";
@@ -93,6 +94,16 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1080}
         defaultProps={defaultMoodProps}
+      />
+
+      {/* Los ocho gestos juntos, para revisarlos de una mirada */}
+      <Composition
+        id="GestureSheet"
+        component={GestureSheet}
+        durationInFrames={fps * 3}
+        fps={fps}
+        width={1440}
+        height={800}
       />
 
       {/* El personaje actuando un guion de actitudes */}

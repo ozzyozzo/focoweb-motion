@@ -6,6 +6,7 @@
   "scripts": {
     "build": "remotion render",
     "dev": "remotion studio",
+    "gestures": "remotion render GestureSheet out/gesture-sheet.mp4",
     "moods": "remotion still MoodSheet out/mood-sheet.png --frame=30",
     "render:all": "npm run render:vertical && npm run render:square && npm run render:alpha && npm run render:reel && npm run render:loop",
     "render:alpha": "remotion render StingAlpha out/sting-alpha.mov --codec=prores --prores-profile=4444 --image-format=png --pixel-format=yuva444p10le",

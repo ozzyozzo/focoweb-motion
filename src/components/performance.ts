@@ -3,6 +3,7 @@ import type { LogoAnim } from "./FocowebLogo";
 import { mixFace, type MoodName } from "./expressions";
 import { moodAnim } from "./moodAnim";
 import { decay } from "./motion";
+import { gestures, type GestureCue } from "./gestures";
 
 /** Un momento del guion: a partir del frame `at`, el personaje siente esto. */
 export type MoodBeat = {
@@ -42,9 +43,54 @@ const blend = (a: LogoAnim, b: LogoAnim, t: number): LogoAnim => ({
 type Options = {
   /** El guion, en orden. Si viene desordenado se ordena solo. */
   beats: MoodBeat[];
+  /** Gestos puntuales que se suman encima de la actitud */
+  cues?: GestureCue[];
   frame: number;
   fps: number;
   withBackground?: boolean;
+};
+
+/**
+ * Suma a la pose todos los gestos que estén ocurriendo en este frame.
+ *
+ * Se aplican encima de la actitud y entre ellos se suman, así que dos gestos
+ * que se pisan se combinan en vez de pelearse. Como cada uno empieza y termina
+ * en cero, un gesto que todavía no arrancó o que ya terminó no aporta nada.
+ */
+const applyGestures = (
+  pose: LogoAnim,
+  cues: GestureCue[],
+  frame: number,
+  fps: number,
+): LogoAnim => {
+  let result = pose;
+
+  for (const cue of cues) {
+    const spec = gestures[cue.gesture];
+    const length = spec.seconds * fps;
+    const t = (frame - cue.at) / length;
+    if (t < 0 || t > 1) {
+      continue;
+    }
+
+    const d = spec.delta(t, cue.strength ?? 1);
+    result = {
+      ...result,
+      bob: result.bob + (d.bob ?? 0),
+      tilt: result.tilt + (d.tilt ?? 0),
+      squash: result.squash + (d.squash ?? 0),
+      glow: Math.max(0, result.glow + (d.glow ?? 0)),
+      earTilt: [
+        result.earTilt[0] + (d.earTilt?.[0] ?? 0),
+        result.earTilt[1] + (d.earTilt?.[1] ?? 0),
+      ],
+      face: d.facePull
+        ? mixFace(result.face, d.facePull.face, d.facePull.amount)
+        : result.face,
+    };
+  }
+
+  return result;
 };
 
 /**
@@ -58,9 +104,14 @@ type Options = {
  * Además cada cambio suelta un pequeño impulso que se va apagando, para que la
  * transición se lea como una reacción y no como una interpolación. Sin eso,
  * pasar de pensando a frustrado se siente correcto pero muerto.
+ *
+ * Sobre todo eso se suman los gestos puntuales, que no reemplazan la actitud
+ * sino que la acompañan: el personaje puede negar con la cabeza sin dejar de
+ * estar frustrado.
  */
 export const performanceAnim = ({
   beats,
+  cues = [],
   frame,
   fps,
   withBackground = true,
@@ -108,7 +159,7 @@ export const performanceAnim = ({
     );
   }, 0);
 
-  return {
+  const withImpulse: LogoAnim = {
     ...pose,
     squash: pose.squash + impulse * 0.3,
     earTilt: [
@@ -117,4 +168,6 @@ export const performanceAnim = ({
     ],
     bob: pose.bob + impulse * 4,
   };
+
+  return applyGestures(withImpulse, cues, frame, fps);
 };
