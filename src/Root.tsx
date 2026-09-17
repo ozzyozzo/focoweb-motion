@@ -2,6 +2,10 @@ import React from "react";
 import { Composition } from "remotion";
 import { LogoSting, defaultStingProps } from "./compositions/LogoSting";
 import { ReelIntro, defaultReelProps } from "./compositions/ReelIntro";
+import {
+  CharacterLoop,
+  defaultCharacterProps,
+} from "./compositions/CharacterLoop";
 import { fps } from "./theme";
 
 /**
@@ -44,6 +48,33 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
         defaultProps={{
           ...defaultStingProps,
+          withBackground: false,
+          showWordmark: false,
+          tagline: "",
+        }}
+      />
+
+      {/* El personaje en reposo, en loop perfecto */}
+      <Composition
+        id="CharacterLoop"
+        component={CharacterLoop}
+        durationInFrames={fps * 4}
+        fps={fps}
+        width={1080}
+        height={1080}
+        defaultProps={defaultCharacterProps}
+      />
+
+      {/* El mismo loop, vertical y sin fondo, para usarlo como sticker */}
+      <Composition
+        id="CharacterLoopAlpha"
+        component={CharacterLoop}
+        durationInFrames={fps * 4}
+        fps={fps}
+        width={1080}
+        height={1080}
+        defaultProps={{
+          ...defaultCharacterProps,
           withBackground: false,
           showWordmark: false,
           tagline: "",

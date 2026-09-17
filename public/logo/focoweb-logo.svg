@@ -1,8 +1,9 @@
-<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" xmlns:c2pa="http://c2pa.org/manifest">
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- userSpaceOnUse: sin esto, las lineas verticales y horizontales
-         (rayo superior y rosca) tienen bounding box de tamano cero y el
-         navegador no las pinta. -->
+    <!-- gradientUnits="userSpaceOnUse" es necesario: con el valor por
+         defecto (objectBoundingBox) las lineas perfectamente horizontales,
+         como las dos de la rosca, tienen bounding box de altura cero, el
+         gradiente queda degenerado y el navegador no las pinta. -->
     <linearGradient id="bulbGlow" gradientUnits="userSpaceOnUse" x1="110" y1="48" x2="290" y2="344">
       <stop offset="0%" stop-color="#FFD874"/>
       <stop offset="100%" stop-color="#FF9F45"/>

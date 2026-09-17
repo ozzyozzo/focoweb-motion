@@ -27,6 +27,8 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 | `StingSquare` | 1080×1080 (1:1) | 3 s | Feed de Instagram y LinkedIn |
 | `StingAlpha` | 1080×1080, fondo transparente | 3 s | Superponer el logo encima de otro video |
 | `ReelIntro` | 1080×1920 (9:16) | 8 s | Reel completo: logo, titular, puntos y llamado a la acción |
+| `CharacterLoop` | 1080×1080 (1:1) | 4 s | El personaje en reposo, en loop perfecto |
+| `CharacterLoopAlpha` | 1080×1080, fondo transparente | 4 s | El mismo loop como sticker sobre otro video |
 
 ## Renderizar
 
@@ -34,8 +36,10 @@ para moverte cuadro a cuadro y un panel para editar los textos en vivo.
 npm run render:vertical     # out/sting-vertical.mp4
 npm run render:square       # out/sting-square.mp4
 npm run render:reel         # out/reel-intro.mp4
+npm run render:loop         # out/character-loop.mp4
 npm run render:alpha        # out/sting-alpha.mov  (ProRes 4444, para editores)
 npm run render:alpha-webm   # out/sting-alpha.webm (VP8, más liviano, para web)
+npm run render:loop-alpha   # out/character-loop.webm (loop con transparencia)
 npm run render:all
 ```
 
@@ -60,10 +64,13 @@ src/
   components/
     FocowebLogo.tsx             El isotipo en SVG, con cada pieza animable
     useStingAnim.ts             La línea de tiempo del encendido
+    useCharacterAnim.ts         El ciclo de reposo del personaje
+    motion.ts                   Utilidades de movimiento compartidas
     Wordmark.tsx                El logotipo en texto
   compositions/
     LogoSting.tsx               Sting del logo, solo
     ReelIntro.tsx               Plantilla de Reel con mensaje
+    CharacterLoop.tsx           El personaje vivo, en loop
 public/logo/                    El SVG original, corregido
 ```
 
@@ -75,8 +82,8 @@ Todo el timing del encendido vive en la constante `timeline` de
 ```ts
 export const timeline = {
   bodyIn: 0,           // entra la ampolleta con rebote
-  filamentStart: 14,   // empieza a dibujarse el filamento "W"
-  filamentEnd: 36,
+  faceStart: 14,       // empieza a dibujarse la cara
+  faceEnd: 36,
   flashAt: 34,         // golpe de luz del encendido
   flashLength: 12,
   earsStart: 36,       // salen las orejas, una después de la otra
@@ -87,6 +94,35 @@ export const timeline = {
 ```
 
 Deja el Studio abierto mientras editas: recarga en caliente y ves el cambio al instante.
+
+## El logo como personaje
+
+El isotipo no tiene ojos a propósito: la "W" es toda la cara. Las dos
+diagonales de arriba funcionan como orejas y rotan sobre su base, que es el
+extremo pegado a la ampolleta.
+
+`LogoAnim`, en `src/components/FocowebLogo.tsx`, expone estos controles:
+
+| Campo | Qué hace |
+|---|---|
+| `earTilt` | Grados que rota cada oreja. Positivo las abre hacia afuera, negativo las para. |
+| `squash` | Aplastado y estirado. Positivo aplasta, negativo estira, y el volumen se conserva. |
+| `tilt` | Inclinación de todo el cuerpo, sobre la base del casquillo. |
+| `bob` | Desplazamiento vertical. Negativo es hacia arriba. |
+| `face` | Forma de la "W": 0 neutra, 1 sonrisa amplia, -1 cara chica. |
+
+La cara se anima interpolando entre tres versiones de la "W" que tienen los
+mismos puntos en el mismo orden, así que se puede mezclar punto por punto.
+
+Las amplitudes del ciclo de reposo están en la constante `character` de
+`src/components/useCharacterAnim.ts`. Subir `earFlap` o `squash` exagera el
+gesto; bajarlos lo vuelve más serio.
+
+**Regla del loop**: `useCharacterAnim` calcula todo sobre una fase que da
+exactamente una vuelta a lo largo de la composición. Como cada término es un
+múltiplo entero de esa fase (`sin(phase)`, `sin(2 * phase)`, …), el último
+frame empalma con el primero. Si agregas movimiento, mantén esa regla o el
+loop va a saltar.
 
 ## Nota sobre el SVG del logo
 
@@ -105,7 +141,9 @@ archivo original:
    buena y la vertical se quitó de verdad en vez de quedar oculta por accidente.
 3. **Se quitó la metadata C2PA**, que pesaba 7,7 KB de los 9,3 KB del archivo.
 
-Conviene llevar estos mismos cambios al archivo maestro en `~/biz/focoweb/logo/`.
+El archivo maestro en `~/biz/focoweb/logo/focoweb-logo.svg` ya tiene los
+mismos cambios aplicados. La versión anterior, con la metadata C2PA firmada,
+quedó respaldada ahí mismo como `focoweb-logo.c2pa-backup.svg`.
 
 ## Publicar en redes
 

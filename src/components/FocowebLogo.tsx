@@ -11,16 +11,29 @@ export type LogoAnim = {
   bodyScale: number;
   /** Opacidad del cuerpo */
   bodyOpacity: number;
-  /** Cuánto del filamento "W" está dibujado, de 0 a 1 */
+  /** Cuánto del filamento está dibujado, de 0 a 1 */
   filament: number;
   /** Intensidad del resplandor del filamento, de 0 a 1 */
   glow: number;
-  /** Progreso de cada oreja, de 0 a 1 */
+  /** Progreso de dibujo de cada oreja, de 0 a 1 */
   ears: [number, number];
   /** Opacidad del flash radial del encendido, de 0 a 1 */
   flash: number;
   /** Opacidad del fondo azul noche (0 = fondo transparente) */
   background: number;
+
+  // --- Controles de personaje ---
+
+  /** Grados que rota cada oreja sobre su base. Positivo = hacia afuera. */
+  earTilt: [number, number];
+  /** Aplastado y estirado. Positivo aplasta (ancho y bajo), negativo estira. */
+  squash: number;
+  /** Grados que se inclina todo el cuerpo, sobre la base del casquillo */
+  tilt: number;
+  /** Desplazamiento vertical del personaje, en unidades del viewBox */
+  bob: number;
+  /** Forma de la cara: 0 neutra, 1 sonrisa amplia, -1 cara chica */
+  face: number;
 };
 
 export const idleAnim: LogoAnim = {
@@ -31,21 +44,43 @@ export const idleAnim: LogoAnim = {
   ears: [1, 1],
   flash: 0,
   background: 1,
+  earTilt: [0, 0],
+  squash: 0,
+  tilt: 0,
+  bob: 0,
+  face: 0,
 };
 
 /** Las dos orejas, definidas desde el extremo pegado a la ampolleta hacia
  *  afuera, para que el trazo se dibuje saliendo de ella.
- *  El primer punto de cada una es también su pivote natural de rotación,
- *  por si más adelante se quieren mover como orejas de verdad. */
+ *  El pivote es ese mismo extremo interior: es el punto sobre el que rotan. */
 const EARS = [
-  { d: "M 136 98 L 116 78", pivot: [136, 98] },
-  { d: "M 264 98 L 284 78", pivot: [264, 98] },
+  { d: "M 136 98 L 116 78", pivot: [136, 98], direction: -1 },
+  { d: "M 264 98 L 284 78", pivot: [264, 98], direction: 1 },
 ] as const;
 
-/** Un dashoffset fuera de [0,1] desplaza el patrón y abre huecos. */
-const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+/**
+ * La "W" es toda la cara del personaje, así que se anima cambiando su forma.
+ * Las tres variantes tienen exactamente los mismos puntos, en el mismo orden,
+ * para poder interpolar entre ellas punto por punto.
+ */
+const FACE_NEUTRAL = [148, 168, 172, 216, 200, 176, 228, 216, 252, 168];
+const FACE_HAPPY = [140, 160, 168, 226, 200, 182, 232, 226, 260, 160];
+const FACE_SMALL = [160, 178, 177, 205, 200, 186, 223, 205, 240, 178];
 
-const FILAMENT_PATH = "M 148 168 L 172 216 L 200 176 L 228 216 L 252 168";
+/** Pivote del personaje: la punta del casquillo, o sea donde "se apoya". */
+const FEET = [200, 344] as const;
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/** Construye la "W" mezclando la forma neutra con la alegre o la chica. */
+const facePath = (face: number): string => {
+  const target = face >= 0 ? FACE_HAPPY : FACE_SMALL;
+  const t = Math.min(1, Math.abs(face));
+  const p = FACE_NEUTRAL.map((v, i) => lerp(v, target[i], t));
+  return `M ${p[0]} ${p[1]} L ${p[2]} ${p[3]} L ${p[4]} ${p[5]} L ${p[6]} ${p[7]} L ${p[8]} ${p[9]}`;
+};
 
 type Props = {
   anim: LogoAnim;
@@ -54,8 +89,33 @@ type Props = {
 };
 
 export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
-  const { bodyScale, bodyOpacity, filament, glow, ears, flash, background } =
-    anim;
+  const {
+    bodyScale,
+    bodyOpacity,
+    filament,
+    glow,
+    ears,
+    flash,
+    background,
+    earTilt,
+    squash,
+    tilt,
+    bob,
+    face,
+  } = anim;
+
+  // Aplastar y estirar conserva el volumen: lo que se ensancha, se acorta.
+  const squashX = 1 + squash * 0.16;
+  const squashY = 1 - squash * 0.16;
+
+  /** El personaje se mueve, se inclina y se deforma siempre desde sus pies. */
+  const characterTransform = [
+    `translate(0 ${bob})`,
+    `translate(${FEET[0]} ${FEET[1]})`,
+    `rotate(${tilt})`,
+    `scale(${squashX} ${squashY})`,
+    `translate(${-FEET[0]} ${-FEET[1]})`,
+  ].join(" ");
 
   return (
     <svg
@@ -68,9 +128,9 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
       <defs>
         {/* gradientUnits="userSpaceOnUse" es obligatorio aquí: con el valor
             por defecto (objectBoundingBox) las líneas perfectamente
-            verticales u horizontales tienen caja de tamaño cero y el
-            navegador no las pinta. Así además el degradado es continuo a
-            lo largo de todo el isotipo en vez de repetirse en cada pieza. */}
+            horizontales, como las dos de la rosca, tienen caja de altura
+            cero y el navegador no las pinta. Así además el degradado es
+            continuo a lo largo de todo el isotipo. */}
         <linearGradient
           id="bulbGlow"
           gradientUnits="userSpaceOnUse"
@@ -95,7 +155,7 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
         </clipPath>
       </defs>
 
-      {/* Fondo azul noche */}
+      {/* Fondo azul noche. Queda fuera del personaje: no se mueve con él. */}
       <rect
         x="0"
         y="0"
@@ -106,104 +166,105 @@ export const FocowebLogo: React.FC<Props> = ({ anim, size }) => {
         opacity={background}
       />
 
-      {/* Orejas: se dibujan desde la ampolleta hacia afuera */}
-      <g
-        stroke="url(#bulbGlow)"
-        strokeWidth="10"
-        strokeLinecap="round"
-        opacity={0.9}
-        style={{
-          filter: `drop-shadow(0 0 ${6 * glow}px ${colors.halo})`,
-        }}
-      >
-        {EARS.map((ear, i) => (
-          <path
-            key={ear.d}
-            d={ear.d}
-            fill="none"
-            pathLength={1}
-            strokeDasharray={1}
-            strokeDashoffset={clamp01(1 - ears[i])}
-          />
-        ))}
-      </g>
-
-      {/* Cuerpo de la ampolleta: escala desde su propio centro */}
-      <g
-        opacity={bodyOpacity}
-        transform={`translate(200 200) scale(${bodyScale}) translate(-200 -200)`}
-      >
-        {/* Vidrio */}
-        <circle
-          cx="200"
-          cy="188"
-          r="98"
-          fill={colors.glass}
+      <g transform={characterTransform}>
+        {/* Orejas: se dibujan saliendo de la ampolleta y rotan sobre su base */}
+        <g
           stroke="url(#bulbGlow)"
           strokeWidth="10"
-        />
-
-        {/* Resplandor interior del vidrio cuando el filamento está encendido */}
-        <g clipPath="url(#glassClip)">
-          <circle
-            cx="200"
-            cy="196"
-            r="98"
-            fill="url(#flashGlow)"
-            opacity={glow * 0.55}
-          />
+          strokeLinecap="round"
+          opacity={0.9}
+          style={{ filter: `drop-shadow(0 0 ${6 * glow}px ${colors.halo})` }}
+        >
+          {EARS.map((ear, i) => (
+            <path
+              key={ear.d}
+              d={ear.d}
+              fill="none"
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={clamp01(1 - ears[i])}
+              transform={`rotate(${earTilt[i] * ear.direction} ${ear.pivot[0]} ${ear.pivot[1]})`}
+            />
+          ))}
         </g>
 
-        {/* Cuello */}
-        <path
-          d="M 168 274 L 168 302 Q 168 314 180 314 L 220 314 Q 232 314 232 302 L 232 274 Z"
-          fill={colors.glass}
-          stroke="url(#bulbGlow)"
-          strokeWidth="10"
-          strokeLinejoin="round"
-        />
+        {/* Cuerpo de la ampolleta: escala desde su propio centro */}
+        <g
+          opacity={bodyOpacity}
+          transform={`translate(200 200) scale(${bodyScale}) translate(-200 -200)`}
+        >
+          {/* Vidrio */}
+          <circle
+            cx="200"
+            cy="188"
+            r="98"
+            fill={colors.glass}
+            stroke="url(#bulbGlow)"
+            strokeWidth="10"
+          />
 
-        {/* Rosca */}
-        <line
-          x1="166"
-          y1="290"
-          x2="234"
-          y2="290"
-          stroke="url(#bulbGlow)"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <line
-          x1="168"
-          y1="304"
-          x2="232"
-          y2="304"
-          stroke="url(#bulbGlow)"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
+          {/* Resplandor interior cuando la cara está encendida */}
+          <g clipPath="url(#glassClip)">
+            <circle
+              cx="200"
+              cy="196"
+              r="98"
+              fill="url(#flashGlow)"
+              opacity={glow * 0.55}
+            />
+          </g>
 
-        {/* Base */}
-        <path
-          d="M 176 318 L 224 318 L 220 336 Q 218 344 208 344 L 192 344 Q 182 344 180 336 Z"
-          fill="url(#bulbGlow)"
-        />
+          {/* Cuello */}
+          <path
+            d="M 168 274 L 168 302 Q 168 314 180 314 L 220 314 Q 232 314 232 302 L 232 274 Z"
+            fill={colors.glass}
+            stroke="url(#bulbGlow)"
+            strokeWidth="10"
+            strokeLinejoin="round"
+          />
 
-        {/* Filamento en "W": se dibuja de izquierda a derecha */}
-        <path
-          d={FILAMENT_PATH}
-          fill="none"
-          stroke="url(#bulbGlow)"
-          strokeWidth="14"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          pathLength={1}
-          strokeDasharray={1}
-          strokeDashoffset={clamp01(1 - filament)}
-          style={{
-            filter: `drop-shadow(0 0 ${4 + 22 * glow}px ${colors.halo})`,
-          }}
-        />
+          {/* Rosca */}
+          <line
+            x1="166"
+            y1="290"
+            x2="234"
+            y2="290"
+            stroke="url(#bulbGlow)"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+          <line
+            x1="168"
+            y1="304"
+            x2="232"
+            y2="304"
+            stroke="url(#bulbGlow)"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+
+          {/* Base */}
+          <path
+            d="M 176 318 L 224 318 L 220 336 Q 218 344 208 344 L 192 344 Q 182 344 180 336 Z"
+            fill="url(#bulbGlow)"
+          />
+
+          {/* La cara: la "W" completa, que se dibuja y luego cambia de forma */}
+          <path
+            d={facePath(face)}
+            fill="none"
+            stroke="url(#bulbGlow)"
+            strokeWidth="14"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pathLength={1}
+            strokeDasharray={1}
+            strokeDashoffset={clamp01(1 - filament)}
+            style={{
+              filter: `drop-shadow(0 0 ${4 + 22 * glow}px ${colors.halo})`,
+            }}
+          />
+        </g>
       </g>
 
       {/* Flash radial del momento del encendido */}

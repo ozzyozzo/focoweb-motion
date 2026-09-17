@@ -1,5 +1,6 @@
 import { interpolate, spring, Easing } from "remotion";
 import type { LogoAnim } from "./FocowebLogo";
+import { decay } from "./motion";
 
 /**
  * Línea de tiempo del "sting" del logo, en frames a 30 fps.
@@ -8,9 +9,9 @@ import type { LogoAnim } from "./FocowebLogo";
 export const timeline = {
   /** La ampolleta entra con rebote */
   bodyIn: 0,
-  /** Empieza a dibujarse el filamento */
-  filamentStart: 14,
-  filamentEnd: 36,
+  /** Empieza a dibujarse la cara */
+  faceStart: 14,
+  faceEnd: 36,
   /** Golpe de luz del encendido */
   flashAt: 34,
   flashLength: 12,
@@ -46,10 +47,10 @@ export const useStingAnim = ({
     extrapolateRight: "clamp",
   });
 
-  // El filamento se dibuja de izquierda a derecha
+  // La cara se dibuja de izquierda a derecha
   const filament = interpolate(
     frame,
-    [timeline.filamentStart, timeline.filamentEnd],
+    [timeline.faceStart, timeline.faceEnd],
     [0, 1],
     {
       extrapolateLeft: "clamp",
@@ -94,6 +95,36 @@ export const useStingAnim = ({
     });
   };
 
+  // Al salir, cada oreja se sacude y se va frenando
+  const earSettle = (index: number) =>
+    18 *
+    decay({
+      frame,
+      fps,
+      start: timeline.earsStart + index * timeline.earStagger + 4,
+      frequency: 3.2,
+      halfLife: 0.28,
+    });
+
+  // El cuerpo acusa el golpe de luz: se aplasta un instante y rebota
+  const squash =
+    0.5 *
+    decay({
+      frame,
+      fps,
+      start: timeline.flashAt,
+      frequency: 2.4,
+      halfLife: 0.3,
+    });
+
+  // La cara pasa de chica y apagada a una sonrisa al encenderse
+  const face = interpolate(
+    frame,
+    [timeline.faceStart, timeline.flashAt, timeline.flashAt + 14],
+    [-0.6, 0.45, 0.15],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
+
   return {
     bodyScale,
     bodyOpacity,
@@ -102,5 +133,10 @@ export const useStingAnim = ({
     ears: [ear(0), ear(1)],
     flash,
     background: withBackground ? 1 : 0,
+    earTilt: [earSettle(0), earSettle(1)],
+    squash,
+    tilt: 0,
+    bob: 0,
+    face,
   };
 };

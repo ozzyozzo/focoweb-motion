@@ -4,16 +4,18 @@
   "private": true,
   "description": "Plantillas de video para redes sociales de Focoweb, hechas con Remotion",
   "scripts": {
-    "dev": "remotion studio",
     "build": "remotion render",
-    "render:vertical": "remotion render StingVertical out/sting-vertical.mp4",
-    "render:square": "remotion render StingSquare out/sting-square.mp4",
+    "dev": "remotion studio",
+    "render:all": "npm run render:vertical && npm run render:square && npm run render:alpha && npm run render:reel && npm run render:loop",
     "render:alpha": "remotion render StingAlpha out/sting-alpha.mov --codec=prores --prores-profile=4444 --image-format=png --pixel-format=yuva444p10le",
+    "render:alpha-webm": "remotion render StingAlpha out/sting-alpha.webm --codec=vp8 --image-format=png --pixel-format=yuva420p",
+    "render:loop": "remotion render CharacterLoop out/character-loop.mp4",
+    "render:loop-alpha": "remotion render CharacterLoopAlpha out/character-loop.webm --codec=vp8 --image-format=png --pixel-format=yuva420p",
     "render:reel": "remotion render ReelIntro out/reel-intro.mp4",
-    "render:all": "npm run render:vertical && npm run render:square && npm run render:alpha && npm run render:reel",
+    "render:square": "remotion render StingSquare out/sting-square.mp4",
+    "render:vertical": "remotion render StingVertical out/sting-vertical.mp4",
     "typecheck": "tsc --noEmit",
-    "upgrade": "remotion upgrade",
-    "render:alpha-webm": "remotion render StingAlpha out/sting-alpha.webm --codec=vp8 --image-format=png --pixel-format=yuva420p"
+    "upgrade": "remotion upgrade"
   },
   "dependencies": {
     "@remotion/cli": "4.0.525",
